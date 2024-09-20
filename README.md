@@ -1,7 +1,7 @@
 
 # Small Talk Android App
 
-This project involves the development of a mobile chat application for Android, using Firebase as the backend platform. The app will allow users to:
+This project involves the development of a mobile chat application for Android, using Firebase as the backend platform. The app allow users to:
 
 - Register
 - Log in
