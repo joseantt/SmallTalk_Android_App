@@ -5,4 +5,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="icon_background">#20FFFFFF</color>
     <color name="red">#F44336</color>
+    <color name="grey">#858585</color>
+    <color name="input_background">#CECECE</color>
 </resources>
