@@ -1,8 +1,9 @@
 package com.example.smalltalk.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class OpenChatsModel {
+public class OpenChatsModel implements Serializable {
     private String id, lastMessage, userEmailOne, userEmailTwo;
     private Date createdAt;
 

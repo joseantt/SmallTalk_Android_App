@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smalltalk.R;
+import com.example.smalltalk.listeners.OpenChatListener;
 import com.example.smalltalk.models.OpenChatsModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -17,14 +18,16 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 
 public class OpenChatsAdapter extends RecyclerView.Adapter<OpenChatsAdapter.OpenChatsViewHolder> {
-    Context ctx;
-    ArrayList<OpenChatsModel> openChatsModels;
-    FirebaseUser currentUser;
+    private final Context ctx;
+    private final ArrayList<OpenChatsModel> openChatsModels;
+    private final FirebaseUser currentUser;
+    private final OpenChatListener openChatListener;
 
-    public  OpenChatsAdapter(Context ctx, ArrayList<OpenChatsModel> openChatsModels) {
+    public  OpenChatsAdapter(Context ctx, ArrayList<OpenChatsModel> openChatsModels, OpenChatListener openChatListener) {
         this.ctx = ctx;
         this.openChatsModels = openChatsModels;
         this.currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        this.openChatListener = openChatListener;
     }
 
     @NonNull
@@ -33,7 +36,7 @@ public class OpenChatsAdapter extends RecyclerView.Adapter<OpenChatsAdapter.Open
         LayoutInflater inflater = LayoutInflater.from(ctx);
         View view = inflater.inflate(R.layout.open_chats_container, parent, false);
 
-        return new OpenChatsAdapter.OpenChatsViewHolder(view);
+        return new OpenChatsAdapter.OpenChatsViewHolder(view, openChatListener);
     }
 
     @Override
@@ -55,11 +58,23 @@ public class OpenChatsAdapter extends RecyclerView.Adapter<OpenChatsAdapter.Open
         TextView tvUser;
         TextView tvLastMessage;
 
-        public OpenChatsViewHolder (View itemView) {
+        public OpenChatsViewHolder (View itemView, OpenChatListener openChatListener) {
             super(itemView);
 
             tvUser = itemView.findViewById(R.id.user);
             tvLastMessage = itemView.findViewById(R.id.lastMessage);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (openChatListener == null)
+                        return;
+
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        openChatListener.onOpenChatClicked(pos);
+                    }
+                }
+            });
         }
     }
 }

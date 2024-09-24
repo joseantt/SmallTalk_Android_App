@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smalltalk.adapter.OpenChatsAdapter;
+import com.example.smalltalk.listeners.OpenChatListener;
 import com.example.smalltalk.models.OpenChatsModel;
 import com.example.smalltalk.models.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,11 +21,12 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OpenChatListener {
 
     private RecyclerView openChatsRecyclerView;
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
+    private ArrayList<OpenChatsModel> openChats;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        this.openChatsRecyclerView = findViewById(R.id.openChatsRecyclerView);
+        openChatsRecyclerView = findViewById(R.id.openChatsRecyclerView);
         db = FirebaseFirestore.getInstance();
 
         getOpenChats();
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    ArrayList<OpenChatsModel> openChats = new ArrayList<>();
+                    openChats = new ArrayList<>();
                     for (QueryDocumentSnapshot qds : task.getResult()) {
                         String userEmailOne = qds.getString("user_email_one");
                         String userEmailTwo = qds.getString("user_email_two");
@@ -84,10 +86,17 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (!openChats.isEmpty()) {
-                        OpenChatsAdapter openChatsAdapter = new OpenChatsAdapter(this, openChats);
+                        OpenChatsAdapter openChatsAdapter = new OpenChatsAdapter(this, openChats, this);
                         this.openChatsRecyclerView.setAdapter(openChatsAdapter);
                         this.openChatsRecyclerView.setVisibility(View.VISIBLE);
                     }
                 });
+    }
+
+    @Override
+    public void onOpenChatClicked(int position) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra("openChat", openChats.get(position));
+        startActivity(intent);
     }
 }
