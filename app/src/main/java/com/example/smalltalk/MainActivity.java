@@ -1,48 +1,61 @@
 package com.example.smalltalk;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smalltalk.adapter.OpenChatsAdapter;
 import com.example.smalltalk.models.OpenChatsModel;
+import com.example.smalltalk.models.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView openChatsRecyclerView;
+    private FirebaseFirestore db;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (currentUser == null){
+            changeActivity();
+            return;
+        }
+
         this.openChatsRecyclerView = findViewById(R.id.openChatsRecyclerView);
+        db = FirebaseFirestore.getInstance();
 
         getOpenChats();
     }
 
-    private void getOpenChats() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private void changeActivity(){
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
-        db.collection("openChats")
+    private void getOpenChats() {
+        db.collection("open_chat")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful() && task.getResult() == null) {
@@ -52,10 +65,21 @@ public class MainActivity extends AppCompatActivity {
 
                     ArrayList<OpenChatsModel> openChats = new ArrayList<>();
                     for (QueryDocumentSnapshot qds : task.getResult()) {
+                        String userEmailOne = qds.getString("user_email_one");
+                        String userEmailTwo = qds.getString("user_email_two");
+
+                        if (!currentUser.getEmail().equals(userEmailOne)
+                                && !currentUser.getEmail().equals(userEmailTwo))
+                            continue;
+
                         OpenChatsModel openChat = new OpenChatsModel(
-                                qds.getString("email"),
-                                qds.getString("lastMessage")
+                                qds.getId(),
+                                qds.getString("last_message"),
+                                userEmailOne,
+                                userEmailTwo,
+                                qds.getDate("created_at")
                         );
+
                         openChats.add(openChat);
                     }
 
@@ -66,5 +90,4 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
 }

@@ -11,16 +11,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smalltalk.R;
 import com.example.smalltalk.models.OpenChatsModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 
 public class OpenChatsAdapter extends RecyclerView.Adapter<OpenChatsAdapter.OpenChatsViewHolder> {
     Context ctx;
     ArrayList<OpenChatsModel> openChatsModels;
+    FirebaseUser currentUser;
 
     public  OpenChatsAdapter(Context ctx, ArrayList<OpenChatsModel> openChatsModels) {
         this.ctx = ctx;
         this.openChatsModels = openChatsModels;
+        this.currentUser = FirebaseAuth.getInstance().getCurrentUser();
     }
 
     @NonNull
@@ -34,7 +38,11 @@ public class OpenChatsAdapter extends RecyclerView.Adapter<OpenChatsAdapter.Open
 
     @Override
     public void onBindViewHolder(@NonNull OpenChatsViewHolder holder, int position) {
-        holder.tvEmail.setText(openChatsModels.get(position).getEmail());
+        holder.tvUser.setText(
+                currentUser.getEmail().equalsIgnoreCase(openChatsModels.get(position).getUserEmailOne())
+                        ? openChatsModels.get(position).getUserEmailTwo()
+                        : openChatsModels.get(position).getUserEmailOne()
+        );
         holder.tvLastMessage.setText(openChatsModels.get(position).getLastMessage());
     }
 
@@ -44,13 +52,13 @@ public class OpenChatsAdapter extends RecyclerView.Adapter<OpenChatsAdapter.Open
     }
 
     public static class OpenChatsViewHolder extends RecyclerView.ViewHolder {
-        TextView tvEmail;
+        TextView tvUser;
         TextView tvLastMessage;
 
         public OpenChatsViewHolder (View itemView) {
             super(itemView);
 
-            tvEmail = itemView.findViewById(R.id.email);
+            tvUser = itemView.findViewById(R.id.user);
             tvLastMessage = itemView.findViewById(R.id.lastMessage);
         }
     }
