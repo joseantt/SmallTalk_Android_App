@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SmallTalk</string>
+    <string name="back_arrow">back_arrow</string>
+    <string name="send_image">send_image</string>
+    <string name="hint_chat_input">Envía un mensaje</string>
+    <string name="send_message">send_message</string>
 </resources>
