@@ -8,4 +8,6 @@
     <color name="grey">#858585</color>
     <color name="image_background">#CECECE</color>
     <color name="input_background">#8684A8</color>
+    <color name="blackish_gray">#30302E</color>
+    <color name="logo_color">#FF5B52BA</color>
 </resources>
