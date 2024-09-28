@@ -2,7 +2,9 @@ package com.example.smalltalk;
 
 import static com.example.smalltalk.utils.GeneralUtils.showAlert;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -61,8 +63,6 @@ public class RegisterActivity extends AppCompatActivity {
             if(fieldsAreInvalid()){
                 return;
             }
-            /* TODO: Check if user is already created,
-            *  check if its truly an email */
             register();
         });
     }
@@ -80,16 +80,15 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void register(){
-        String email = mEmailEditText.getEditText().getText().toString();
+        String email = mEmailEditText.getEditText().getText().toString().toLowerCase();
         String password = mPasswordEditText.getEditText().getText().toString();
 
-        mAuth.createUserWithEmailAndPassword(email.toLowerCase(), password)
+        mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Go to main activity
-                            // TODO:
+                            saveUserPreferences(email, password);
                             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
@@ -148,5 +147,13 @@ public class RegisterActivity extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         finish();
+    }
+
+    private void saveUserPreferences(String email, String password) {
+        SharedPreferences sharedPref = getSharedPreferences("user", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("email", email);
+        editor.putString("password", password);
+        editor.apply();
     }
 }
