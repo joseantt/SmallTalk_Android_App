@@ -2,20 +2,20 @@ package com.example.smalltalk;
 
 import static com.example.smalltalk.utils.GeneralUtils.showAlert;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.smalltalk.utils.GeneralUtils;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,7 +26,6 @@ public class LoginActivity extends AppCompatActivity {
     private Button mRegisterButton;
     private TextInputLayout mEmailEditText;
     private TextInputLayout mPasswordEditText;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,19 +69,39 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+
+        SharedPreferences sharedPref = getSharedPreferences("user", Context.MODE_PRIVATE);
+        String email = sharedPref.getString("email", "");
+        String password = sharedPref.getString("password", "");
+
+        // Check if user is signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
             changeActivity(MainActivity.class);
         }
+        // Check if user has saved credentials
+        else if(!email.isEmpty() && !password.isEmpty()){
+            mAuth.signInWithEmailAndPassword(email.toLowerCase(), password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            changeActivity(MainActivity.class);
+                        }
+                    });
+        }
+        // If not, proceed with login
+        else {
+            findViewById(R.id.cl_spinner).setVisibility(View.GONE);
+        }
     }
 
     public void login(View view) {
-        String email = mEmailEditText.getEditText().getText().toString();
+        String email = mEmailEditText.getEditText().getText().toString().toLowerCase();
         String password = mPasswordEditText.getEditText().getText().toString();
 
-        mAuth.signInWithEmailAndPassword(email.toLowerCase(), password)
+        mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
+                        saveUserPreferences(email, password);
                         changeActivity(MainActivity.class);
                     } else {
                         showAlert("Error", "Correo o contraseña incorrectos", this);
@@ -101,4 +120,11 @@ public class LoginActivity extends AppCompatActivity {
                 || mPasswordEditText.getEditText().getText().toString().isBlank();
     }
 
+    private void saveUserPreferences(String email, String password) {
+        SharedPreferences sharedPref = getSharedPreferences("user", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("email", email);
+        editor.putString("password", password);
+        editor.apply();
+    }
 }
