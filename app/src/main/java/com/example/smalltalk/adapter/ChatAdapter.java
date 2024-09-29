@@ -46,9 +46,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (getItemViewType(position) == VIEW_TYPE_SENT) {
             ((SentMessageViewHolder) holder).tvTextMessage.setText(chatMessages.get(position).getMessage());
             ((SentMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSendedAt());
+            ((SentMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
         } else {
             ((ReceivedMessageViewHolder) holder).tvTextMessage.setText(chatMessages.get(position).getMessage());
             ((ReceivedMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSendedAt());
+            ((ReceivedMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
         }
     }
 
@@ -67,24 +69,28 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static class SentMessageViewHolder extends RecyclerView.ViewHolder {
         TextView tvTextMessage;
         TextView tvMessageDateTime;
+        TextView tvUserEmail;
 
         public SentMessageViewHolder (View itemView) {
             super(itemView);
 
             tvTextMessage = itemView.findViewById(R.id.textMessage);
             tvMessageDateTime = itemView.findViewById(R.id.messageDateTime);
+            tvUserEmail = itemView.findViewById(R.id.userEmail);
         }
     }
 
     public static class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
         TextView tvTextMessage;
         TextView tvMessageDateTime;
+        TextView tvUserEmail;
 
         public ReceivedMessageViewHolder(View itemView) {
             super(itemView);
 
             tvTextMessage = itemView.findViewById(R.id.textMessage);
             tvMessageDateTime = itemView.findViewById((R.id.messageDateTime));
+            tvUserEmail = itemView.findViewById(R.id.userEmail);
         }
     }
 

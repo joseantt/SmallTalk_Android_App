@@ -8,32 +8,57 @@
     android:background="@color/primary"
     tools:context=".ChatActivity">
 
+
     <ImageView
         android:id="@+id/backArrow"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="40dp"
         android:contentDescription="@string/back_arrow"
         android:src="@drawable/round_arrow_back_24"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/userImage"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/background_image"
+        android:scaleType="centerCrop"
+        android:src="@drawable/round_person_24"
+        app:layout_constraintStart_toEndOf="@+id/backArrow"
+        app:layout_constraintTop_toTopOf="parent"
+        app:riv_oval="true" />
 
     <TextView
         android:id="@+id/receiverUserEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="40dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="tyrion@gmail.com"
+        android:text="@string/test_message"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/userImage"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/background_content"
+        app:layout_constraintBottom_toTopOf="@id/sendImage"
+        app:layout_constraintTop_toBottomOf="@+id/userImage">
+    </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/messagesRecyclerView"
@@ -45,23 +70,11 @@
         android:padding="20dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:visibility="visible"
+        android:visibility="gone"
+        app:stackFromEnd="true"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@+id/receiverUserEmail"
-        app:layout_constraintBottom_toTopOf="@id/sendImage"
-        />
-
-    <FrameLayout
-        android:id="@+id/frameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/background_content"
-        app:layout_constraintBottom_toTopOf="@id/sendImage"
-        app:layout_constraintTop_toBottomOf="@+id/receiverUserEmail">
-
-    </FrameLayout>
+        app:layout_constraintTop_toBottomOf="@+id/userImage"
+        app:layout_constraintBottom_toTopOf="@id/sendImage" />
 
     <ImageView
         android:id="@+id/sendImage"

@@ -4,13 +4,15 @@ import java.util.Date;
 
 public class ChatMessage {
     private String id, chatId, senderEmail, message, sendedAt;
+    private Date dateObject;
 
-    public ChatMessage(String id, String chatId, String senderEmail, String message, String sendedAt) {
+    public ChatMessage(String id, String chatId, String senderEmail, String message, String sendedAt, Date dateObject) {
         this.id = id;
         this.chatId = chatId;
         this.senderEmail = senderEmail;
         this.message = message;
         this.sendedAt = sendedAt;
+        this.dateObject = dateObject;
     }
 
     public String getId() {
@@ -51,5 +53,13 @@ public class ChatMessage {
 
     public void setSendedAt(String sendedAt) {
         this.sendedAt = sendedAt;
+    }
+
+    public Date getDateObject() {
+        return dateObject;
+    }
+
+    public void setDateObject(Date dateObject) {
+        this.dateObject = dateObject;
     }
 }

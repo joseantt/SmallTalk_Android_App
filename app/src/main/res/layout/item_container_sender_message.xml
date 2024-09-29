@@ -2,21 +2,61 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="4dp">
-    
-    <TextView
-        android:id="@+id/textMessage"
+
+    <LinearLayout
+        android:id="@+id/layoutMessage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:background="@drawable/background_sender_message"
-        android:padding="12dp"
-        android:textColor="@color/white"
-        android:textSize="13sp"
-        android:text="Hello my name is macaco woods"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintWidth_max="wrap"
+        app:layout_constraintWidth_percent="0.8">
+
+        <TextView
+            android:id="@+id/userEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/test_message"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/textMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/test_message"
+            android:textColor="@color/white"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+<!--    <TextView-->
+<!--        android:id="@+id/textMessage"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="4dp"-->
+<!--        android:background="@drawable/background_sender_message"-->
+<!--        android:paddingStart="12dp"-->
+<!--        android:paddingTop="8dp"-->
+<!--        android:paddingEnd="12dp"-->
+<!--        android:paddingBottom="8dp"-->
+<!--        android:textColor="@color/white"-->
+<!--        android:textSize="13sp"-->
+<!--        android:text="@string/test_message"-->
+<!--        app:layout_constraintWidth_max="wrap"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintWidth_percent="0.8" />-->
 
     <TextView
         android:id="@+id/messageDateTime"
@@ -26,6 +66,6 @@
         android:textSize="11sp"
         android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textMessage" />
+        app:layout_constraintTop_toBottomOf="@id/layoutMessage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
