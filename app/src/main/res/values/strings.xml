@@ -4,4 +4,5 @@
     <string name="send_image">send_image</string>
     <string name="hint_chat_input">Envía un mensaje</string>
     <string name="send_message">send_message</string>
+    <string name="test_message">This is a test message</string>
 </resources>
