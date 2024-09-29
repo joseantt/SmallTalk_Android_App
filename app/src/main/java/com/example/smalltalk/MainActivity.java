@@ -3,6 +3,7 @@ package com.example.smalltalk;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -34,6 +35,9 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        ImageButton logoutBtn = findViewById(R.id.btn_logout);
+
+        logoutBtn.setOnClickListener(v -> logout());
     }
 
     @Override
@@ -98,5 +102,15 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("openChat", openChats.get(position));
         startActivity(intent);
+    }
+
+    private void logout(){
+        deleteUserPreferences();
+        FirebaseAuth.getInstance().signOut();
+        changeActivity();
+    }
+
+    private void deleteUserPreferences(){
+        getSharedPreferences("user", MODE_PRIVATE).edit().clear().apply();
     }
 }

@@ -9,17 +9,18 @@
     tools:context=".MainActivity">
 
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="18dp"
-        android:layout_marginEnd="22dp"
-        android:background="@drawable/background_icon"
-        android:src="@drawable/round_logout_24"
-        android:tint="@color/red"
+    <ImageButton
+        android:id="@+id/btn_logout"
+        android:layout_width="48dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/icon_background"
+        android:scaleType="centerCrop"
+        app:tint="#FF3F3F"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-    </androidx.appcompat.widget.AppCompatImageView>
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/round_logout_24" />
 
 
     <ImageView
