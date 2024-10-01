@@ -27,6 +27,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -89,6 +93,7 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             saveUserPreferences(email, password);
+                            addToUserCollection(email);
                             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
@@ -155,5 +160,14 @@ public class RegisterActivity extends AppCompatActivity {
         editor.putString("email", email);
         editor.putString("password", password);
         editor.apply();
+    }
+
+    private void addToUserCollection(String email) {
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("email", email);
+        db.collection("user").add(user);
     }
 }
