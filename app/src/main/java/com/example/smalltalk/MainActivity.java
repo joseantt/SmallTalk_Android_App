@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -145,7 +146,23 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
     private void logout(){
         deleteUserPreferences();
         FirebaseAuth.getInstance().signOut();
+        deleteUserToken();
         changeActivity();
+    }
+
+    private void deleteUserToken() {
+        db.collection("user")
+                .whereEqualTo("email", currentUser.getEmail())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d("FirestoreQuery", "Error getting documents: ", task.getException());
+                        return;
+                    }
+
+                    for (QueryDocumentSnapshot document : task.getResult())
+                        document.getReference().update("token", FieldValue.delete());
+                });
     }
 
     private void deleteUserPreferences(){
