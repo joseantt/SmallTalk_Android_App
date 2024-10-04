@@ -1,6 +1,7 @@
 package com.example.smalltalk;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -91,7 +92,13 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setListeners() {
-        ivBackArrow.setOnClickListener(v -> finish());
+        ivBackArrow.setOnClickListener(v -> {
+            Intent intent = new Intent(ChatActivity.this, MainActivity.class);
+            intent.putExtra("openChat", openChat);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            finish();
+        });
         ivSendMessage.setOnClickListener(v -> sendMessage());
         tvChatInput.setOnKeyListener((view, i, keyEvent) -> {
             if (i == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_UP) {

@@ -7,6 +7,9 @@ public class OpenChatsModel implements Serializable {
     private String id, lastMessage, userEmailOne, userEmailTwo;
     private Date createdAt;
 
+    public OpenChatsModel() {
+    }
+
     public OpenChatsModel(String id, String lastMessage, String userEmailOne, String userEmailTwo, Date createdAt) {
         this.id = id;
         this.lastMessage = lastMessage;

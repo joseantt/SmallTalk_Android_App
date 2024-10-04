@@ -1,12 +1,8 @@
 package com.example.smalltalk;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +27,7 @@ public class SearcherActivity extends AppCompatActivity {
     private SearchAdapter adapter;
     private RecyclerView recyclerView;
     private TextInputLayout etSearch;
-    private ImageButton searchButton;
+    private ImageButton btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +38,7 @@ public class SearcherActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         recyclerView = findViewById(R.id.rv_users);
         etSearch = findViewById(R.id.et_search);
-        searchButton = findViewById(R.id.btn_search);
+        btnBack = findViewById(R.id.btn_backwards);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -50,12 +46,19 @@ public class SearcherActivity extends AppCompatActivity {
             return insets;
         });
 
-        searchButton.setOnClickListener(v -> {
+        setupRecyclerView("");
+
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(SearcherActivity.this, MainActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            finish();
+        });
+
+        etSearch.setEndIconOnClickListener(v -> {
             String searchTerm = etSearch.getEditText().getText().toString();
             setupRecyclerView(searchTerm);
         });
-
-        setupRecyclerView("");
     }
 
     void setupRecyclerView(String searchTerm) {
@@ -74,29 +77,5 @@ public class SearcherActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
         adapter.startListening();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if(adapter != null) {
-            adapter.startListening();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if(adapter != null) {
-            adapter.stopListening();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(adapter != null) {
-            adapter.startListening();
-        }
     }
 }

@@ -29,42 +29,29 @@
             android:id="@+id/btn_backwards"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginBottom="13dp"
             android:background="@null"
             android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/round_arrow_back_24" />
-
-        <ImageButton
-            android:id="@+id/btn_search"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="40dp"
-            android:layout_marginEnd="16dp"
-            android:background="@null"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_search" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/et_search"
-            android:layout_width="260dp"
+            android:layout_width="288dp"
             android:layout_height="60dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="28dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="10dp"
             android:hint="Inicia o busca un chat"
-            app:layout_constraintEnd_toStartOf="@+id/btn_search"
-            app:layout_constraintStart_toEndOf="@+id/btn_backwards"
-            app:layout_constraintTop_toTopOf="parent">
+            app:endIconDrawable="@drawable/ic_search"
+            app:endIconMode="custom"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_backwards">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
 
