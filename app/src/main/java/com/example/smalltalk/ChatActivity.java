@@ -1,12 +1,19 @@
 package com.example.smalltalk;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -23,6 +30,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.auth.oauth2.GoogleCredentials;
 
 import org.json.JSONException;
@@ -37,6 +46,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -49,12 +59,15 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatMessages;
     private ChatAdapter chatAdapter;
     private FirebaseFirestore db;
+    private StorageReference storageReference;
 
     private TextView tvReceiverUserEmail;
     private ImageView ivBackArrow;
     private RecyclerView messagesRecyclerView;
     private TextView tvChatInput;
     private ImageView ivSendMessage;
+    private ImageView ivSendImage;
+    private ProgressBar progressBar;
 
     private static final String MESSAGING_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
     private static final String[] SCOPES = { MESSAGING_SCOPE };
@@ -70,12 +83,15 @@ public class ChatActivity extends AppCompatActivity {
         messagesRecyclerView = findViewById(R.id.messagesRecyclerView);
         tvChatInput = findViewById(R.id.chatInput);
         ivSendMessage = findViewById(R.id.sendMessage);
+        ivSendImage = findViewById(R.id.sendImage);
+        progressBar = findViewById(R.id.progressBar);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         chatMessages = new ArrayList<>();
         chatAdapter = new ChatAdapter(this, chatMessages, currentUser.getEmail());
         messagesRecyclerView.setAdapter(chatAdapter);
         db = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
 
         loadOpenChat();
         setListeners();
@@ -91,6 +107,7 @@ public class ChatActivity extends AppCompatActivity {
         msg.put("sender_email", currentUser.getEmail());
         msg.put("message", tvChatInput.getText().toString());
         msg.put("sended_at", new Date());
+        msg.put("image_url", "");
         db.collection("chat_message").add(msg);
         sendNotification(tvChatInput.getText().toString());
         tvChatInput.setText(null);
@@ -182,7 +199,13 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setListeners() {
-        ivBackArrow.setOnClickListener(v -> finish());
+        ivBackArrow.setOnClickListener(v -> {
+            Intent intent = new Intent(ChatActivity.this, MainActivity.class);
+            intent.putExtra("openChat", openChat);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            finish();
+        });
         ivSendMessage.setOnClickListener(v -> sendMessage());
         tvChatInput.setOnKeyListener((view, i, keyEvent) -> {
             if (i == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_UP) {
@@ -190,6 +213,12 @@ public class ChatActivity extends AppCompatActivity {
                 return true;
             }
             return false;
+        });
+
+        ivSendImage.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            activityResultLauncher.launch(intent);
         });
     }
 
@@ -201,6 +230,43 @@ public class ChatActivity extends AppCompatActivity {
         db.collection("chat_message")
                 .whereEqualTo("chat_id", openChat.getId())
                 .addSnapshotListener(eventListener);
+    }
+
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if (o.getResultCode() == RESULT_OK && o.getData() != null){
+                        Uri imageUri = o.getData().getData();
+                        if (imageUri != null) {
+                            uploadImage(imageUri);
+                        }
+                    }
+                }
+            });
+
+    private void uploadImage(Uri imageUri) {
+        progressBar.setVisibility(View.VISIBLE);
+
+        StorageReference reference = storageReference.child("images/" + UUID.randomUUID().toString());
+        reference.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    progressBar.setVisibility(View.GONE);
+
+                    reference.getDownloadUrl().addOnSuccessListener(uri -> {
+                        Map<String, Object> msg = new HashMap<>();
+                        msg.put("chat_id", openChat.getId());
+                        msg.put("sender_email", currentUser.getEmail());
+                        msg.put("message", "");
+                        msg.put("sended_at", new Date());
+                        msg.put("image_url", uri.toString());
+                        db.collection("chat_message").add(msg);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error al subir imagen, inténtalo de nuevo", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                });
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -217,7 +283,8 @@ public class ChatActivity extends AppCompatActivity {
                         documentChange.getDocument().getString("sender_email"),
                         documentChange.getDocument().getString("message"),
                         getReadableDateTime(documentChange.getDocument().getDate("sended_at")),
-                        documentChange.getDocument().getDate("sended_at")
+                        documentChange.getDocument().getDate("sended_at"),
+                        documentChange.getDocument().getString("image_url")
                 );
                 chatMessages.add(chatMessage);
             }
