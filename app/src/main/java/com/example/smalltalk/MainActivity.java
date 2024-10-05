@@ -8,23 +8,19 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smalltalk.adapter.OpenChatsAdapter;
 import com.example.smalltalk.listeners.OpenChatListener;
 import com.example.smalltalk.models.OpenChatsModel;
-import com.example.smalltalk.models.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
@@ -74,6 +70,12 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
                     });
 
         }
+
+        FloatingActionButton btnSearchChat = findViewById(R.id.btn_search);
+        btnSearchChat.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SearcherActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override
