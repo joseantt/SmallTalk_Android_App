@@ -43,6 +43,8 @@ dependencies {
     implementation("com.makeramen:roundedimageview:2.3.0")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.firebaseui:firebase-ui-firestore:8.0.2")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation(libs.appcompat)
     implementation(libs.material)

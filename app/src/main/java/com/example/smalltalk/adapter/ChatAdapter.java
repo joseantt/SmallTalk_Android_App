@@ -1,14 +1,17 @@
 package com.example.smalltalk.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.smalltalk.R;
 import com.example.smalltalk.models.ChatMessage;
 
@@ -47,10 +50,27 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((SentMessageViewHolder) holder).tvTextMessage.setText(chatMessages.get(position).getMessage());
             ((SentMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSendedAt());
             ((SentMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
+
+            Log.d("ChatAdapter", "onBindViewHolder: " + chatMessages.get(position).getImageUrl());
+            if (!chatMessages.get(position).getImageUrl().isEmpty()) {
+                Glide.with(ctx)
+                        .load(chatMessages.get(position).getImageUrl())
+                        .into(((SentMessageViewHolder) holder).ivImageMessage);
+                ((SentMessageViewHolder) holder).ivImageMessage.setVisibility(View.VISIBLE);
+                ((SentMessageViewHolder) holder).tvTextMessage.setVisibility(View.GONE);
+            }
         } else {
             ((ReceivedMessageViewHolder) holder).tvTextMessage.setText(chatMessages.get(position).getMessage());
             ((ReceivedMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSendedAt());
             ((ReceivedMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
+
+            if (!chatMessages.get(position).getImageUrl().isEmpty()) {
+                Glide.with(ctx)
+                        .load(chatMessages.get(position).getImageUrl())
+                        .into(((ReceivedMessageViewHolder) holder).ivImageMessage);
+                ((ReceivedMessageViewHolder) holder).ivImageMessage.setVisibility(View.VISIBLE);
+                ((ReceivedMessageViewHolder) holder).tvTextMessage.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -70,6 +90,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView tvTextMessage;
         TextView tvMessageDateTime;
         TextView tvUserEmail;
+        ImageView ivImageMessage;
 
         public SentMessageViewHolder (View itemView) {
             super(itemView);
@@ -77,6 +98,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvTextMessage = itemView.findViewById(R.id.textMessage);
             tvMessageDateTime = itemView.findViewById(R.id.messageDateTime);
             tvUserEmail = itemView.findViewById(R.id.userEmail);
+            ivImageMessage = itemView.findViewById(R.id.iv_sender_image);
         }
     }
 
@@ -84,6 +106,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView tvTextMessage;
         TextView tvMessageDateTime;
         TextView tvUserEmail;
+        ImageView ivImageMessage;
 
         public ReceivedMessageViewHolder(View itemView) {
             super(itemView);
@@ -91,6 +114,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvTextMessage = itemView.findViewById(R.id.textMessage);
             tvMessageDateTime = itemView.findViewById((R.id.messageDateTime));
             tvUserEmail = itemView.findViewById(R.id.userEmail);
+            ivImageMessage = itemView.findViewById(R.id.iv_receiver_image);
         }
     }
 

@@ -3,16 +3,17 @@ package com.example.smalltalk.models;
 import java.util.Date;
 
 public class ChatMessage {
-    private String id, chatId, senderEmail, message, sendedAt;
+    private String id, chatId, senderEmail, message, sendedAt, imageUrl;
     private Date dateObject;
 
-    public ChatMessage(String id, String chatId, String senderEmail, String message, String sendedAt, Date dateObject) {
+    public ChatMessage(String id, String chatId, String senderEmail, String message, String sendedAt, Date dateObject, String imageUrl) {
         this.id = id;
         this.chatId = chatId;
         this.senderEmail = senderEmail;
         this.message = message;
         this.sendedAt = sendedAt;
         this.dateObject = dateObject;
+        this.imageUrl = imageUrl;
     }
 
     public String getId() {
@@ -61,5 +62,13 @@ public class ChatMessage {
 
     public void setDateObject(Date dateObject) {
         this.dateObject = dateObject;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

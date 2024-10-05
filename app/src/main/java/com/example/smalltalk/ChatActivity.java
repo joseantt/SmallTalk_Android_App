@@ -2,13 +2,19 @@ package com.example.smalltalk;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +29,9 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -39,12 +49,15 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatMessages;
     private ChatAdapter chatAdapter;
     private FirebaseFirestore db;
+    private StorageReference storageReference;
 
     private TextView tvReceiverUserEmail;
     private ImageView ivBackArrow;
     private RecyclerView messagesRecyclerView;
     private TextView tvChatInput;
     private ImageView ivSendMessage;
+    private ImageView ivSendImage;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +70,15 @@ public class ChatActivity extends AppCompatActivity {
         messagesRecyclerView = findViewById(R.id.messagesRecyclerView);
         tvChatInput = findViewById(R.id.chatInput);
         ivSendMessage = findViewById(R.id.sendMessage);
+        ivSendImage = findViewById(R.id.sendImage);
+        progressBar = findViewById(R.id.progressBar);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         chatMessages = new ArrayList<>();
         chatAdapter = new ChatAdapter(this, chatMessages, currentUser.getEmail());
         messagesRecyclerView.setAdapter(chatAdapter);
         db = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
 
         loadOpenChat();
         setListeners();
@@ -78,6 +94,7 @@ public class ChatActivity extends AppCompatActivity {
         msg.put("sender_email", currentUser.getEmail());
         msg.put("message", tvChatInput.getText().toString());
         msg.put("sended_at", new Date());
+        msg.put("image_url", "");
         db.collection("chat_message").add(msg);
         tvChatInput.setText(null);
     }
@@ -107,6 +124,12 @@ public class ChatActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        ivSendImage.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            activityResultLauncher.launch(intent);
+        });
     }
 
     private String getReadableDateTime(Date date) {
@@ -117,6 +140,43 @@ public class ChatActivity extends AppCompatActivity {
         db.collection("chat_message")
                 .whereEqualTo("chat_id", openChat.getId())
                 .addSnapshotListener(eventListener);
+    }
+
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if (o.getResultCode() == RESULT_OK && o.getData() != null){
+                        Uri imageUri = o.getData().getData();
+                        if (imageUri != null) {
+                            uploadImage(imageUri);
+                        }
+                    }
+                }
+            });
+
+    private void uploadImage(Uri imageUri) {
+        progressBar.setVisibility(View.VISIBLE);
+
+        StorageReference reference = storageReference.child("images/" + UUID.randomUUID().toString());
+        reference.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    progressBar.setVisibility(View.GONE);
+
+                    reference.getDownloadUrl().addOnSuccessListener(uri -> {
+                        Map<String, Object> msg = new HashMap<>();
+                        msg.put("chat_id", openChat.getId());
+                        msg.put("sender_email", currentUser.getEmail());
+                        msg.put("message", "");
+                        msg.put("sended_at", new Date());
+                        msg.put("image_url", uri.toString());
+                        db.collection("chat_message").add(msg);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error al subir imagen, inténtalo de nuevo", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                });
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -133,7 +193,8 @@ public class ChatActivity extends AppCompatActivity {
                         documentChange.getDocument().getString("sender_email"),
                         documentChange.getDocument().getString("message"),
                         getReadableDateTime(documentChange.getDocument().getDate("sended_at")),
-                        documentChange.getDocument().getDate("sended_at")
+                        documentChange.getDocument().getDate("sended_at"),
+                        documentChange.getDocument().getString("image_url")
                 );
                 chatMessages.add(chatMessage);
             }
