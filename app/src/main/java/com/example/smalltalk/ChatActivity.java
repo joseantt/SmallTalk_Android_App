@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -17,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,19 +28,29 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.auth.oauth2.GoogleCredentials;
 
+import org.json.JSONException;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -58,6 +68,9 @@ public class ChatActivity extends AppCompatActivity {
     private ImageView ivSendMessage;
     private ImageView ivSendImage;
     private ProgressBar progressBar;
+
+    private static final String MESSAGING_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
+    private static final String[] SCOPES = { MESSAGING_SCOPE };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +109,84 @@ public class ChatActivity extends AppCompatActivity {
         msg.put("sended_at", new Date());
         msg.put("image_url", "");
         db.collection("chat_message").add(msg);
+        sendNotification(tvChatInput.getText().toString());
         tvChatInput.setText(null);
+    }
+
+    private void sendNotification(String message) {
+        String receiverEmail = currentUser.getEmail().equals(openChat.getUserEmailOne())
+                ? openChat.getUserEmailTwo()
+                : openChat.getUserEmailOne();
+
+        // get a user by email
+        db.collection("user")
+                .whereEqualTo("email", receiverEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful())
+                        return;
+
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        String receiverToken = document.getString("token");
+                        if (receiverToken == null)
+                            return;
+
+                        try {
+                            String json = getJsonString(message, receiverToken);
+                            callApi(json);
+                        } catch (Exception e) {
+                            Log.e("ChatActivity", "Error sending notification: " + e.getMessage());
+                        }
+                    }
+                });
+    }
+
+    private String getJsonString(String message, String receiverToken) {
+        String json = "{\n" +
+                "  \"message\": {\n" +
+                "    \"token\": \"" + receiverToken + "\",\n" +
+                "    \"notification\": {\n" +
+                "      \"title\": \"" + currentUser.getEmail() + "\",\n" +
+                "      \"body\": \"" + message + "\"\n" +
+                "    },\n" +
+                "    \"data\": {\n" +
+                "      \"openChatId\": \"" + openChat.getId() + "\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        return json;
+    }
+
+    private void callApi(String json) {
+        Thread thread = new Thread(() -> {
+            MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+            OkHttpClient client = new OkHttpClient();
+            String url = "https://fcm.googleapis.com/v1/projects/small-talk-android/messages:send";
+            RequestBody body = RequestBody.create(JSON, json);
+            okhttp3.Request req;
+            try {
+                req = new okhttp3.Request.Builder()
+                        .url(url)
+                        .post(body)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
+                        .addHeader("Content-Type", "application/json; UTF-8")
+                        .build();
+                client.newCall(req).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
+    }
+
+    public String getAccessToken() throws IOException {
+        InputStream serviceAccountStream = ChatActivity.class.getClassLoader().getResourceAsStream("service-account.json");
+        GoogleCredentials googleCredentials = GoogleCredentials
+                .fromStream(serviceAccountStream)
+                .createScoped(Arrays.asList(SCOPES));
+        googleCredentials.refreshIfExpired();
+        return googleCredentials.getAccessToken().getTokenValue();
     }
 
     private void loadOpenChat() {
