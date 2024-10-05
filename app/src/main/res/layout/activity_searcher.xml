@@ -29,8 +29,8 @@
             android:id="@+id/btn_backwards"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginBottom="13dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="28dp"
             android:background="@null"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -41,17 +41,22 @@
             android:id="@+id/et_search"
             android:layout_width="288dp"
             android:layout_height="60dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="24dp"
             android:hint="Inicia o busca un chat"
             app:endIconDrawable="@drawable/ic_search"
             app:endIconMode="custom"
+            android:importantForAutofill="no"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.62"
             app:layout_constraintStart_toEndOf="@+id/btn_backwards">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
