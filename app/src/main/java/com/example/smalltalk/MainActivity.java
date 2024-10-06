@@ -18,13 +18,17 @@ import com.example.smalltalk.models.OpenChatsModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class MainActivity extends AppCompatActivity implements OpenChatListener {
 
@@ -32,6 +36,9 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
     private ArrayList<OpenChatsModel> openChats;
+    private OpenChatsAdapter openChatsAdapter;
+
+    private static final int LAST_MESSAGE_LIMIT = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
 
         getOpenChats();
         getToken();
+        listenRecentMessages();
     }
 
     private void changeActivity(){
@@ -125,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
 
                         OpenChatsModel openChat = new OpenChatsModel(
                                 qds.getId(),
-                                qds.getString("last_message"),
+                                limitLastMessage(qds.getString("last_message")),
                                 userEmailOne,
                                 userEmailTwo,
                                 qds.getDate("created_at")
@@ -135,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
                     }
 
                     if (!openChats.isEmpty()) {
-                        OpenChatsAdapter openChatsAdapter = new OpenChatsAdapter(this, openChats, this);
+                        this.openChatsAdapter = new OpenChatsAdapter(this, openChats, this);
                         this.openChatsRecyclerView.setAdapter(openChatsAdapter);
                         this.openChatsRecyclerView.setVisibility(View.VISIBLE);
                     }
@@ -193,5 +201,41 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
                     for (QueryDocumentSnapshot document : task.getResult())
                         document.getReference().update("token", token);
                 });
+    }
+
+    private void listenRecentMessages() {
+        db.collection("open_chat")
+                .whereEqualTo("user_email_one", currentUser.getEmail())
+                .addSnapshotListener(eventListener);
+
+        db.collection("open_chat")
+                .whereEqualTo("user_email_two", currentUser.getEmail())
+                .addSnapshotListener(eventListener);
+    }
+
+    private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
+        if (error != null || value == null)
+            return;
+
+        for (DocumentChange documentChange : value.getDocumentChanges()) {
+            if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                QueryDocumentSnapshot document = documentChange.getDocument();
+
+                int pos = IntStream.range(0, openChats.size())
+                        .filter(i -> openChats.get(i).getId().equals(document.getId()))
+                        .findFirst()
+                        .orElse(-1);
+
+                openChats.get(pos).setLastMessage(limitLastMessage(document.getString("last_message")));
+                openChatsAdapter.notifyItemChanged(pos);
+            }
+        }
+    };
+
+    private String limitLastMessage(String text) {
+        if (text == null)
+            return "";
+
+        return text.length() > MainActivity.LAST_MESSAGE_LIMIT ? text.substring(0, MainActivity.LAST_MESSAGE_LIMIT) + "..." : text;
     }
 }

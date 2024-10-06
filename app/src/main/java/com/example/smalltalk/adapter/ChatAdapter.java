@@ -1,7 +1,6 @@
 package com.example.smalltalk.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.smalltalk.R;
 import com.example.smalltalk.models.ChatMessage;
 
@@ -48,10 +46,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == VIEW_TYPE_SENT) {
             ((SentMessageViewHolder) holder).tvTextMessage.setText(chatMessages.get(position).getMessage());
-            ((SentMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSendedAt());
+            ((SentMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSentAt());
             ((SentMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
 
-            Log.d("ChatAdapter", "onBindViewHolder: " + chatMessages.get(position).getImageUrl());
             if (!chatMessages.get(position).getImageUrl().isEmpty()) {
                 Glide.with(ctx)
                         .load(chatMessages.get(position).getImageUrl())
@@ -61,7 +58,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         } else {
             ((ReceivedMessageViewHolder) holder).tvTextMessage.setText(chatMessages.get(position).getMessage());
-            ((ReceivedMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSendedAt());
+            ((ReceivedMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSentAt());
             ((ReceivedMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
 
             if (!chatMessages.get(position).getImageUrl().isEmpty()) {
