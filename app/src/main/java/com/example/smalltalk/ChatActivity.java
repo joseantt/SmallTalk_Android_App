@@ -18,7 +18,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,8 +34,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.auth.oauth2.GoogleCredentials;
-
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,16 +108,22 @@ public class ChatActivity extends AppCompatActivity {
         msg.put("sended_at", new Date());
         msg.put("image_url", "");
         db.collection("chat_message").add(msg);
-        sendNotification(tvChatInput.getText().toString());
+        updateChatLastMessage(tvChatInput.getText().toString());
+        sendNotification(tvChatInput.getText().toString(), "message");
         tvChatInput.setText(null);
     }
 
-    private void sendNotification(String message) {
+    private void updateChatLastMessage(String message) {
+        db.collection("open_chat")
+                .document(openChat.getId())
+                .update("last_message", message);
+    }
+
+    private void sendNotification(String message, String type) {
         String receiverEmail = currentUser.getEmail().equals(openChat.getUserEmailOne())
                 ? openChat.getUserEmailTwo()
                 : openChat.getUserEmailOne();
 
-        // get a user by email
         db.collection("user")
                 .whereEqualTo("email", receiverEmail)
                 .get()
@@ -134,7 +137,9 @@ public class ChatActivity extends AppCompatActivity {
                             return;
 
                         try {
-                            String json = getJsonString(message, receiverToken);
+                            String json = type.equals("message")
+                                    ? getJsonStringMessage(message, receiverToken)
+                                    : getJsonStringImage(message, receiverToken);
                             callApi(json);
                         } catch (Exception e) {
                             Log.e("ChatActivity", "Error sending notification: " + e.getMessage());
@@ -143,8 +148,8 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
-    private String getJsonString(String message, String receiverToken) {
-        String json = "{\n" +
+    private String getJsonStringMessage(String message, String receiverToken) {
+        return "{\n" +
                 "  \"message\": {\n" +
                 "    \"token\": \"" + receiverToken + "\",\n" +
                 "    \"notification\": {\n" +
@@ -156,8 +161,25 @@ public class ChatActivity extends AppCompatActivity {
                 "    }\n" +
                 "  }\n" +
                 "}";
+    }
 
-        return json;
+    private String getJsonStringImage(String imageUrl, String receiverToken) {
+        return "{\n" +
+                "  \"message\": {\n" +
+                "    \"token\": \"" + receiverToken + "\",\n" +
+                "    \"notification\": {\n" +
+                "      \"title\": \"" + currentUser.getEmail() + "\",\n" +
+                "    },\n" +
+                "    \"android\": {\n" +
+                "      \"notification\": {\n" +
+                "        \"image\": \"" + imageUrl + "\"\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"data\": {\n" +
+                "      \"openChatId\": \"" + openChat.getId() + "\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
     }
 
     private void callApi(String json) {
@@ -260,7 +282,11 @@ public class ChatActivity extends AppCompatActivity {
                         msg.put("sended_at", new Date());
                         msg.put("image_url", uri.toString());
                         db.collection("chat_message").add(msg);
+                        sendNotification(uri.toString(), "image");
                     });
+
+                    // Update last message with an emoji
+                    updateChatLastMessage("Image \uD83D\uDCF7");
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error al subir imagen, inténtalo de nuevo", Toast.LENGTH_SHORT).show();
