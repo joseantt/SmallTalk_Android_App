@@ -2,6 +2,9 @@ package com.example.smalltalk;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
@@ -49,8 +52,6 @@ public class SearcherActivity extends AppCompatActivity {
         setupRecyclerView("");
 
         btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(SearcherActivity.this, MainActivity.class);
-            startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             finish();
         });
@@ -58,6 +59,25 @@ public class SearcherActivity extends AppCompatActivity {
         etSearch.setEndIconOnClickListener(v -> {
             String searchTerm = etSearch.getEditText().getText().toString();
             setupRecyclerView(searchTerm);
+        });
+
+        etSearch.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                etSearch.getEditText().setOnKeyListener((v, keyCode, event) -> {
+                    if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                        String searchTerm = s.toString();
+                        setupRecyclerView(searchTerm);
+                        return true;
+                    }
+                    return false;
+                });
+            }
         });
     }
 

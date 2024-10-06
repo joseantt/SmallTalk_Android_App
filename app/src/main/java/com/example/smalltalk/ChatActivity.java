@@ -202,9 +202,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private void setListeners() {
         ivBackArrow.setOnClickListener(v -> {
-            Intent intent = new Intent(ChatActivity.this, MainActivity.class);
-            intent.putExtra("openChat", openChat);
-            startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             finish();
         });
