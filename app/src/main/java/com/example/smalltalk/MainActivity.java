@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smalltalk.adapter.OpenChatsAdapter;
@@ -76,6 +77,9 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
             Intent intent = new Intent(this, SearcherActivity.class);
             startActivity(intent);
         });
+
+        ImageButton logoutBtn = findViewById(R.id.btn_logout);
+        logoutBtn.setOnClickListener(v -> logout());
     }
 
     @Override
@@ -88,9 +92,7 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
         }
 
         openChatsRecyclerView = findViewById(R.id.openChatsRecyclerView);
-        ImageButton logoutBtn = findViewById(R.id.btn_logout);
 
-        logoutBtn.setOnClickListener(v -> logout());
         getOpenChats();
         getToken();
     }
@@ -102,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
     }
 
     private void getOpenChats() {
+        ConstraintLayout clSpinner = findViewById(R.id.cl_spinner);
+
         db.collection("open_chat")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -135,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
                         this.openChatsRecyclerView.setAdapter(openChatsAdapter);
                         this.openChatsRecyclerView.setVisibility(View.VISIBLE);
                     }
+                    clSpinner.setVisibility(View.GONE);
                 });
     }
 
