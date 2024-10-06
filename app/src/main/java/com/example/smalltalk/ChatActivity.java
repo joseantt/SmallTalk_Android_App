@@ -105,7 +105,7 @@ public class ChatActivity extends AppCompatActivity {
         msg.put("chat_id", openChat.getId());
         msg.put("sender_email", currentUser.getEmail());
         msg.put("message", tvChatInput.getText().toString());
-        msg.put("sended_at", new Date());
+        msg.put("sent_at", new Date());
         msg.put("image_url", "");
         db.collection("chat_message").add(msg);
         updateChatLastMessage(tvChatInput.getText().toString());
@@ -279,7 +279,7 @@ public class ChatActivity extends AppCompatActivity {
                         msg.put("chat_id", openChat.getId());
                         msg.put("sender_email", currentUser.getEmail());
                         msg.put("message", "");
-                        msg.put("sended_at", new Date());
+                        msg.put("sent_at", new Date());
                         msg.put("image_url", uri.toString());
                         db.collection("chat_message").add(msg);
                         sendNotification(uri.toString(), "image");
@@ -307,8 +307,8 @@ public class ChatActivity extends AppCompatActivity {
                         documentChange.getDocument().getString("chat_id"),
                         documentChange.getDocument().getString("sender_email"),
                         documentChange.getDocument().getString("message"),
-                        getReadableDateTime(documentChange.getDocument().getDate("sended_at")),
-                        documentChange.getDocument().getDate("sended_at"),
+                        getReadableDateTime(documentChange.getDocument().getDate("sent_at")),
+                        documentChange.getDocument().getDate("sent_at"),
                         documentChange.getDocument().getString("image_url")
                 );
                 chatMessages.add(chatMessage);
