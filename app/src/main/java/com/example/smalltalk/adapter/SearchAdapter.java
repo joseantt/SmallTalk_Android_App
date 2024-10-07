@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smalltalk.ChatActivity;
 import com.example.smalltalk.R;
+import com.example.smalltalk.SearcherActivity;
 import com.example.smalltalk.models.OpenChatsModel;
 import com.example.smalltalk.models.User;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -153,5 +154,6 @@ public class SearchAdapter extends FirestoreRecyclerAdapter<User, SearchAdapter.
         Intent intent = new Intent(ctx, ChatActivity.class);
         intent.putExtra("openChat", openChat);
         ctx.startActivity(intent);
+        ((SearcherActivity) ctx).finish();
     }
 }
