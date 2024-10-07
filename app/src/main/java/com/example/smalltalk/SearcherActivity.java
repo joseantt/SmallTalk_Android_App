@@ -58,6 +58,7 @@ public class SearcherActivity extends AppCompatActivity {
 
         etSearch.setEndIconOnClickListener(v -> {
             String searchTerm = etSearch.getEditText().getText().toString();
+            searchTerm = searchTerm.trim().toLowerCase();
             setupRecyclerView(searchTerm);
         });
 
@@ -72,6 +73,7 @@ public class SearcherActivity extends AppCompatActivity {
                 etSearch.getEditText().setOnKeyListener((v, keyCode, event) -> {
                     if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
                         String searchTerm = s.toString();
+                        searchTerm = searchTerm.trim().toLowerCase();
                         setupRecyclerView(searchTerm);
                         return true;
                     }

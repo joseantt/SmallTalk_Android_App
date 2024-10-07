@@ -50,25 +50,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((SentMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSentAt());
             ((SentMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
 
-            if (!chatMessages.get(position).getImageUrl().isEmpty()) {
-                Glide.with(ctx)
-                        .load(chatMessages.get(position).getImageUrl())
-                        .into(((SentMessageViewHolder) holder).ivImageMessage);
-                ((SentMessageViewHolder) holder).ivImageMessage.setVisibility(View.VISIBLE);
-                ((SentMessageViewHolder) holder).tvTextMessage.setVisibility(View.GONE);
-            }
+            formatIfImage(position, ((SentMessageViewHolder) holder).ivImageMessage,
+                            ((SentMessageViewHolder) holder).tvTextMessage);
         } else {
             ((ReceivedMessageViewHolder) holder).tvTextMessage.setText(chatMessages.get(position).getMessage());
             ((ReceivedMessageViewHolder) holder).tvMessageDateTime.setText(chatMessages.get(position).getSentAt());
             ((ReceivedMessageViewHolder) holder).tvUserEmail.setText(chatMessages.get(position).getSenderEmail());
 
-            if (!chatMessages.get(position).getImageUrl().isEmpty()) {
-                Glide.with(ctx)
-                        .load(chatMessages.get(position).getImageUrl())
-                        .into(((ReceivedMessageViewHolder) holder).ivImageMessage);
-                ((ReceivedMessageViewHolder) holder).ivImageMessage.setVisibility(View.VISIBLE);
-                ((ReceivedMessageViewHolder) holder).tvTextMessage.setVisibility(View.GONE);
-            }
+            formatIfImage(position, ((ReceivedMessageViewHolder) holder).ivImageMessage,
+                            ((ReceivedMessageViewHolder) holder).tvTextMessage);
         }
     }
 
@@ -116,4 +106,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    private void formatIfImage(int position, ImageView imageView, TextView textView) {
+        if (!chatMessages.get(position).getImageUrl().isBlank() && chatMessages.get(position).getMessage().isBlank()) {
+            Glide.with(ctx)
+                    .load(chatMessages.get(position).getImageUrl())
+                    .into(imageView);
+            imageView.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.GONE);
+        } else {
+            imageView.setVisibility(View.GONE);
+            textView.setVisibility(View.VISIBLE);
+        }
+    }
 }
