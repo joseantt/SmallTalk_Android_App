@@ -142,8 +142,8 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
                         openChats.add(openChat);
                     }
 
+                    this.openChatsAdapter = new OpenChatsAdapter(this, openChats, this);
                     if (!openChats.isEmpty()) {
-                        this.openChatsAdapter = new OpenChatsAdapter(this, openChats, this);
                         this.openChatsRecyclerView.setAdapter(openChatsAdapter);
                         this.openChatsRecyclerView.setVisibility(View.VISIBLE);
                     }
