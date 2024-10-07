@@ -226,8 +226,21 @@ public class MainActivity extends AppCompatActivity implements OpenChatListener 
                         .findFirst()
                         .orElse(-1);
 
-                openChats.get(pos).setLastMessage(limitLastMessage(document.getString("last_message")));
-                openChatsAdapter.notifyItemChanged(pos);
+                if (pos == -1) { // New chat
+                    OpenChatsModel openChat = new OpenChatsModel(
+                            document.getId(),
+                            limitLastMessage(document.getString("last_message")),
+                            document.getString("user_email_one"),
+                            document.getString("user_email_two"),
+                            document.getDate("created_at")
+                    );
+
+                    openChats.add(openChat);
+                    openChatsAdapter.notifyItemInserted(openChats.size() - 1);
+                } else { // Update chat
+                    openChats.get(pos).setLastMessage(limitLastMessage(document.getString("last_message")));
+                    openChatsAdapter.notifyItemChanged(pos);
+                }
             }
         }
     };
